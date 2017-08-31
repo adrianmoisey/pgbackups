@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -ex
 
 DATE=$(date +%Y-%m-%d-%H.%M.%S)
 
