@@ -1,5 +1,6 @@
 FROM alpine:3.6
 
+RUN apk --update add --no-cache postgresql
 RUN apk --update add --no-cache postgresql-client
 RUN apk --update add --no-cache bash py-pip py-setuptools ca-certificates
 
