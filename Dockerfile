@@ -8,4 +8,4 @@ RUN pip install s3cmd==2.0.0
 
 COPY backup.sh .
 
-CMD ["backup.sh"]
+CMD ["./backup.sh"]
