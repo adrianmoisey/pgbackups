@@ -1,8 +1,31 @@
 #!/bin/bash -ex
 
-export PGPASSWORD=$(cat /run/secrets/pgpassword)
-export AWS_ACCESS_KEY_ID=$(cat /run/secrets/aws_access_key_id)
-export AWS_SECRET_ACCESS_KEY=$(cat /run/secrets/aws_secret_access_key)
+# usage: file_env VAR [DEFAULT]
+#    ie: file_env 'XYZ_DB_PASSWORD' 'example'
+# (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
+#  "$XYZ_DB_PASSWORD" from a file, especially for Docker's secrets feature)
+file_env() {
+    local var="$1"
+    local fileVar="${var}_FILE"
+    local def="${2:-}"
+    if [ "${!var:-}" ] && [ "${!fileVar:-}" ]; then
+        echo >&2 "error: both $var and $fileVar are set (but are exclusive)"
+        exit 1
+    fi
+    local val="$def"
+    if [ "${!var:-}" ]; then
+        val="${!var}"
+    elif [ "${!fileVar:-}" ]; then
+        val="$(< "${!fileVar}")"
+    fi
+    export "$var"="$val"
+    unset "$fileVar"
+}
+
+
+file_env 'PGPASSWORD'
+file_env 'AWS_ACCESS_KEY_ID'
+file_env 'AWS_SECRET_ACCESS_KEY'
 
 DATE=$(date +%Y-%m-%d-%H.%M.%S)
 pg_dump --schema-only | bzip2 -c > ~/$PGDATABASE-postgres-backup-data-only-$DATE-schema.sql.bz2
